@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil de {{ usuario.username }}</title>
+</head>
+<body>
+    <h1>Perfil de {{ usuario.username }}</h1>
+    <p><strong>Nombre:</strong> {{ usuario.first_name }} {{ usuario.last_name }}</p>
+    <p><strong>Correo electrónico:</strong> {{ usuario.email }}</p>
+
+    <br>
+    <a href="/usuarios/">← Volver a la lista de usuarios</a>
+</body>
+</html>

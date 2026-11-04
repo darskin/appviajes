@@ -1,0 +1,22 @@
+{% extends "viajes/base.html" %}
+{% block title %}Lista de Destinos{% endblock %}
+{% block content %}
+<h1>Mis Destinos Soñados</h1>
+
+<p><a href="{% url 'viajes:crear_destino' %}">+ Crear nuevo destino</a></p>
+
+{% if lista_destinos %}
+    <ul>
+    {% for destino in lista_destinos %}
+        <li>
+            <a href="{% url 'viajes:detalle' destino.id %}"><strong>{{ destino.nombre }}</strong></a>
+            - Presupuesto: ${{ destino.presupuesto }} COP
+            | <a href="{% url 'viajes:editar_destino' destino.id %}">Editar</a>
+            | <a href="{% url 'viajes:eliminar_destino' destino.id %}">Eliminar</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No hay destinos registrados.</p>
+{% endif %}
+{% endblock %}

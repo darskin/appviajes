@@ -1,0 +1,65 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam nodesep 15
+skinparam ranksep 90
+skinparam dpi 150
+title Diagrama de casos de uso - AppViajes
+
+actor Visitante
+actor Viajero
+actor Administrador
+actor "API de IA\nexterna" as IA
+
+Viajero -up-|> Visitante
+Administrador -up-|> Viajero
+
+rectangle "AppViajes" {
+    usecase "CU-02\nConsultar destinos" as CU02
+    usecase "CU-06\nConsultar opciones de plan" as CU06
+    usecase "CU-08\nConsultar resultados" as CU08
+    usecase "CU-12\nRegistrar cuenta" as CU12
+    usecase "CU-09\nIniciar sesión" as CU09
+    usecase "CU-01\nRegistrar destino" as CU01
+    usecase "CU-03\nActualizar destino" as CU03
+    usecase "CU-04\nEliminar destino" as CU04
+    usecase "CU-05\nDefinir opciones de plan" as CU05
+    usecase "CU-07\nVotar por una opción" as CU07
+    usecase "CU-10\nCerrar sesión" as CU10
+    usecase "CU-11\nSolicitar itinerario sugerido" as CU11
+    usecase "CU-13\nAdministrar el sistema desde\nel panel administrativo" as CU13
+}
+
+Visitante -- CU02
+Visitante -- CU06
+Visitante -- CU08
+Visitante -- CU12
+Visitante -- CU09
+
+Viajero -- CU01
+Viajero -- CU03
+Viajero -- CU04
+Viajero -- CU05
+Viajero -- CU07
+Viajero -- CU10
+Viajero -- CU11
+
+Administrador -- CU13
+CU11 -- IA
+
+CU01 ..> CU09 : <<include>>
+CU03 ..> CU09 : <<include>>
+CU04 ..> CU09 : <<include>>
+CU05 ..> CU09 : <<include>>
+CU07 ..> CU09 : <<include>>
+CU11 ..> CU09 : <<include>>
+CU13 ..> CU09 : <<include>>
+
+note bottom of Administrador
+  Por herencia, el Administrador también puede
+  ejecutar los casos de uso del Viajero
+  y del Visitante.
+end note
+@enduml

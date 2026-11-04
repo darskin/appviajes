@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Usuarios</title>
+</head>
+<body>
+    <h1>Comunidad de Viajeros</h1>
+
+    {% if usuarios %}
+        <ul>
+        {% for usuario in usuarios %}
+            <li>
+                <a href="/usuarios/{{ usuario.id }}/">{{ usuario.username }}</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay usuarios registrados.</p>
+    {% endif %}
+</body>
+</html>

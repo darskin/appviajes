@@ -1,0 +1,49 @@
+{% extends "viajes/base.html" %}
+{% block title %}{{ destino.nombre }}{% endblock %}
+{% block content %}
+<h1>{{ destino.nombre }}</h1>
+<p><strong>Descripción:</strong> {{ destino.descripcion }}</p>
+<p><strong>Presupuesto estimado:</strong> ${{ destino.presupuesto }} COP</p>
+
+<hr>
+
+<form action="{% url 'viajes:vote' destino.id %}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        <legend><h2>Opciones disponibles / Votación</h2></legend>
+
+        {% if error_message %}
+            <p style="color: red;"><strong>{{ error_message }}</strong></p>
+        {% endif %}
+
+        {% for choice in destino.choice_set.all %}
+            <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+            <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label>
+            <button type="submit" form="del-{{ choice.id }}" title="Quitar opción">✕</button><br>
+        {% empty %}
+            <p>No hay opciones de votación registradas para este destino.</p>
+        {% endfor %}
+    </fieldset>
+
+    <br>
+    {% if destino.choice_set.exists %}<input type="submit" value="Votar">{% endif %}
+</form>
+
+{% for choice in destino.choice_set.all %}
+<form id="del-{{ choice.id }}" method="post" action="{% url 'viajes:eliminar_opcion' destino.id choice.id %}">{% csrf_token %}</form>
+{% endfor %}
+
+<h3>Agregar opción</h3>
+<form method="post" action="{% url 'viajes:agregar_opcion' destino.id %}">
+    {% csrf_token %}
+    {{ choice_form.as_p }}
+    <button type="submit">Agregar</button>
+</form>
+
+<p>
+    <a href="{% url 'viajes:results' destino.id %}">Ver resultados</a> |
+    <a href="{% url 'viajes:editar_destino' destino.id %}">Editar este destino</a> |
+    <a href="{% url 'viajes:eliminar_destino' destino.id %}">Eliminar este destino</a>
+</p>
+<a href="{% url 'viajes:index' %}">← Volver a la lista de destinos</a>
+{% endblock %}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog de Viajes</title>
+</head>
+<body>
+    <h1>Artículos del Blog</h1>
+
+    {% if publicaciones %}
+        <ul>
+        {% for post in publicaciones %}
+            <li>
+                <a href="/blog/{{ post.id }}/">{{ post.titulo }}</a> 
+                <small>({{ post.fecha_creacion|date:"d/m/Y" }})</small>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay publicaciones en el blog aún.</p>
+    {% endif %}
+</body>
+</html>

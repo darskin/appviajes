@@ -1,0 +1,48 @@
+@startuml
+skinparam shadowing false
+skinparam monochrome true
+skinparam dpi 150
+skinparam nodesep 40
+skinparam ranksep 60
+title Diagrama de despliegue - AppViajes
+
+node "Cliente" {
+  artifact "Navegador web" as NAV
+}
+
+node "Render (nube)" {
+  node "Servicio web" {
+    artifact "Contenedor Docker\nDjango + Gunicorn" as WEB
+  }
+  node "Servicio ia-service" {
+    artifact "Contenedor Docker\nNode.js + Express + Swagger" as IAS
+  }
+  node "PostgreSQL administrado" {
+    database "Base de datos" as PG
+  }
+}
+
+node "Proveedor de IA generativa" as PROV {
+  artifact "API de IA" as API
+}
+
+node "GitHub" {
+  artifact "Repositorio\n(rama principal)" as REPO
+}
+
+node "Entorno local (Docker Compose)" {
+  artifact "web" as LW
+  artifact "ia-service" as LI
+  database "db" as LD
+}
+
+NAV --> WEB : HTTPS 443
+NAV --> IAS : HTTPS (Swagger)
+WEB --> IAS : HTTP / REST interno
+WEB --> PG : TCP 5432
+IAS --> API : HTTPS
+REPO ..> WEB : despliegue
+REPO ..> IAS : despliegue
+LW --> LI : HTTP
+LW --> LD : TCP 5432
+@enduml

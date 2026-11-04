@@ -1,0 +1,46 @@
+@startuml
+skinparam shadowing false
+skinparam monochrome true
+skinparam dpi 150
+skinparam componentStyle uml2
+skinparam nodesep 40
+skinparam ranksep 60
+title Diagrama de componentes - AppViajes
+
+actor "Navegador web" as NAV
+
+package "Aplicación Django" {
+  [Vistas y plantillas] as VIS
+  [Autenticación y roles] as AUTH
+  [App viajes\n(destinos, opciones, votos)] as VIA
+  [Django Admin] as ADM
+  [Cliente HTTP\nde ia-service] as CLI
+}
+
+package "Microservicio ia-service (Node.js)" {
+  [API REST (Express)] as API
+  [Documentación\nSwagger / OpenAPI] as SWG
+  [Conector de IA] as CON
+}
+
+database "PostgreSQL" as DB
+cloud "API de IA generativa\n(sistema externo)" as IA
+
+NAV --> VIS : HTTPS
+NAV --> ADM : HTTPS
+VIS --> AUTH
+VIS --> VIA
+VIA --> CLI
+CLI --> API : REST / JSON
+API --> CON
+CON --> IA : HTTPS + API key
+SWG ..> API : documenta
+AUTH --> DB : ORM
+VIA --> DB : ORM
+ADM --> DB : ORM
+
+note bottom of CLI
+  Las claves y las URLs entre servicios
+  se leen de variables de entorno (RNF-08).
+end note
+@enduml

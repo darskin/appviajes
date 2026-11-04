@@ -1,0 +1,16 @@
+{% extends "viajes/base.html" %}
+{% block title %}Resultados - {{ destino.nombre }}{% endblock %}
+{% block content %}
+<h1>Resultados para {{ destino.nombre }}</h1>
+
+<ul>
+{% for choice in opciones %}
+    <li>{{ choice.choice_text }} -- {{ choice.votes }} voto{{ choice.votes|pluralize }}</li>
+{% empty %}
+    <li>No hay opciones disponibles.</li>
+{% endfor %}
+</ul>
+
+<a href="{% url 'viajes:detalle' destino.id %}">¿Votar de nuevo?</a> |
+<a href="{% url 'viajes:index' %}">Volver a la lista</a>
+{% endblock %}
