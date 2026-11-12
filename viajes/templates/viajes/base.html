@@ -1,13 +1,35 @@
-<!DOCTYPE html>
+{% load static %}<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AppViajes{% endblock %}</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 860px; margin: 0 auto; padding: 0 16px 40px; line-height: 1.5; }
+        nav { display: flex; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid #ccc; flex-wrap: wrap; }
+        nav .espacio { flex: 1; }
+        nav form { display: inline; margin: 0; }
+        .enlace { background: none; border: 0; padding: 0; color: #0645ad; cursor: pointer; font: inherit; text-decoration: underline; }
+        .mensaje { background: #e8f5e9; border: 1px solid #a5d6a7; padding: 8px 12px; margin: 12px 0; }
+        .error, .errorlist { color: #b00020; }
+        .rol { font-size: .85em; color: #555; }
+    </style>
 </head>
 <body>
-    <nav><a href="{% url 'viajes:index' %}">Destinos</a></nav>
-    <hr>
+    <nav>
+        <a href="{% url 'viajes:index' %}"><strong>AppViajes</strong></a>
+        <a href="{% url 'viajes:index' %}">Destinos</a>
+        <span class="espacio"></span>
+        {% if user.is_authenticated %}
+            <span>{{ user.username }} <span class="rol">({% if user.is_staff %}administrador{% else %}viajero{% endif %})</span></span>
+            {% if user.is_staff %}<a href="{% url 'admin:index' %}">Panel admin</a>{% endif %}
+            <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="enlace" type="submit">Cerrar sesión</button></form>
+        {% else %}
+            <a href="{% url 'login' %}">Iniciar sesión</a>
+            <a href="{% url 'registro' %}">Registrarse</a>
+        {% endif %}
+    </nav>
+    {% for m in messages %}<p class="mensaje">{{ m }}</p>{% endfor %}
     {% block content %}{% endblock %}
 </body>
 </html>

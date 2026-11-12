@@ -1,0 +1,32 @@
+# Desarrollo local: Django + PostgreSQL.  Uso:  docker compose up --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: appviajes
+      POSTGRES_USER: appviajes
+      POSTGRES_PASSWORD: appviajes
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appviajes"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgres://appviajes:appviajes@db:5432/appviajes
+      SECRET_KEY: cambia-esta-clave-en-local
+      DEBUG: "True"
+      DJANGO_SUPERUSER_USERNAME: admin
+      DJANGO_SUPERUSER_PASSWORD: admin12345
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

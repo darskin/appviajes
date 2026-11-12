@@ -1,49 +1,57 @@
 {% extends "viajes/base.html" %}
+{% load permisos %}
 {% block title %}{{ destino.nombre }}{% endblock %}
 {% block content %}
+{% with gestionable=destino|puede_gestionar:user %}
 <h1>{{ destino.nombre }}</h1>
 <p><strong>Descripción:</strong> {{ destino.descripcion }}</p>
 <p><strong>Presupuesto estimado:</strong> ${{ destino.presupuesto }} COP</p>
+{% if destino.propietario %}<p class="rol">Propuesto por {{ destino.propietario.username }}</p>{% endif %}
 
 <hr>
 
+<h2>Opciones disponibles / Votación</h2>
+{% if error_message %}<p class="error"><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% if user.is_authenticated %}
 <form action="{% url 'viajes:vote' destino.id %}" method="post">
     {% csrf_token %}
-    <fieldset>
-        <legend><h2>Opciones disponibles / Votación</h2></legend>
-
-        {% if error_message %}
-            <p style="color: red;"><strong>{{ error_message }}</strong></p>
-        {% endif %}
-
-        {% for choice in destino.choice_set.all %}
-            <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-            <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label>
-            <button type="submit" form="del-{{ choice.id }}" title="Quitar opción">✕</button><br>
-        {% empty %}
-            <p>No hay opciones de votación registradas para este destino.</p>
-        {% endfor %}
-    </fieldset>
-
-    <br>
-    {% if destino.choice_set.exists %}<input type="submit" value="Votar">{% endif %}
+    {% for choice in destino.choice_set.all %}
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}"{% if voto_actual and voto_actual.opcion_id == choice.id %} checked{% endif %}>
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label>
+        {% if gestionable %}<button type="submit" form="del-{{ choice.id }}" title="Quitar opción">✕</button>{% endif %}<br>
+    {% empty %}
+        <p>No hay opciones de votación registradas para este destino.</p>
+    {% endfor %}
+    {% if destino.choice_set.exists %}
+        <br><input type="submit" value="{% if voto_actual %}Cambiar mi voto{% else %}Votar{% endif %}">
+    {% endif %}
 </form>
+{% else %}
+    <ul>{% for choice in destino.choice_set.all %}<li>{{ choice.choice_text }}</li>{% empty %}<li>No hay opciones registradas.</li>{% endfor %}</ul>
+    <p><a href="{% url 'login' %}?next={{ request.path }}">Inicia sesión</a> para votar.</p>
+{% endif %}
 
-{% for choice in destino.choice_set.all %}
-<form id="del-{{ choice.id }}" method="post" action="{% url 'viajes:eliminar_opcion' destino.id choice.id %}">{% csrf_token %}</form>
-{% endfor %}
+{% if gestionable %}
+    {% for choice in destino.choice_set.all %}
+    <form id="del-{{ choice.id }}" method="post" action="{% url 'viajes:eliminar_opcion' destino.id choice.id %}">{% csrf_token %}</form>
+    {% endfor %}
 
-<h3>Agregar opción</h3>
-<form method="post" action="{% url 'viajes:agregar_opcion' destino.id %}">
-    {% csrf_token %}
-    {{ choice_form.as_p }}
-    <button type="submit">Agregar</button>
-</form>
+    <h3>Agregar opción</h3>
+    <form method="post" action="{% url 'viajes:agregar_opcion' destino.id %}">
+        {% csrf_token %}
+        {{ choice_form.as_p }}
+        <button type="submit">Agregar</button>
+    </form>
+{% endif %}
 
 <p>
-    <a href="{% url 'viajes:results' destino.id %}">Ver resultados</a> |
-    <a href="{% url 'viajes:editar_destino' destino.id %}">Editar este destino</a> |
-    <a href="{% url 'viajes:eliminar_destino' destino.id %}">Eliminar este destino</a>
+    <a href="{% url 'viajes:results' destino.id %}">Ver resultados</a>
+    {% if gestionable %}
+    | <a href="{% url 'viajes:editar_destino' destino.id %}">Editar este destino</a>
+    | <a href="{% url 'viajes:eliminar_destino' destino.id %}">Eliminar este destino</a>
+    {% endif %}
 </p>
 <a href="{% url 'viajes:index' %}">← Volver a la lista de destinos</a>
+{% endwith %}
 {% endblock %}

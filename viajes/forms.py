@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 from .models import Choice, Destino
 
 
@@ -44,3 +45,10 @@ class ChoiceForm(forms.ModelForm):
         model = Choice
         fields = ['choice_text']
         labels = {'choice_text': 'Nueva opción'}
+
+
+class RegistroForm(UserCreationForm):
+    """Registro de cuenta; el rol de viajero se asigna en la vista."""
+
+    class Meta(UserCreationForm.Meta):
+        fields = ('username',)
