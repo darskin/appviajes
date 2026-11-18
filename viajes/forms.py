@@ -52,3 +52,10 @@ class RegistroForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         fields = ('username',)
+
+
+class ItinerarioForm(forms.Form):
+    dias = forms.IntegerField(
+        label='Número de días', min_value=1, max_value=14, initial=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control'}),
+    )

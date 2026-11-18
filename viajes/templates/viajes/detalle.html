@@ -47,6 +47,7 @@
 
 <p>
     <a href="{% url 'viajes:results' destino.id %}">Ver resultados</a>
+    | <a href="{% url 'viajes:itinerario' destino.id %}">Itinerario sugerido (IA)</a>
     {% if gestionable %}
     | <a href="{% url 'viajes:editar_destino' destino.id %}">Editar este destino</a>
     | <a href="{% url 'viajes:eliminar_destino' destino.id %}">Eliminar este destino</a>

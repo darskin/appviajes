@@ -6,7 +6,8 @@ from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from .forms import ChoiceForm, DestinoForm, RegistroForm
+from . import ia_client
+from .forms import ChoiceForm, DestinoForm, ItinerarioForm, RegistroForm
 from .models import Choice, Destino, Voto
 from .permisos import destino_gestionable
 
@@ -129,3 +130,26 @@ def results(request, destino_id):
     destino = get_object_or_404(Destino, pk=destino_id)
     opciones = destino.choice_set.annotate(votes=Count('voto')).order_by('-votes', 'choice_text')
     return render(request, 'viajes/results.html', {'destino': destino, 'opciones': opciones})
+
+
+@login_required
+def itinerario(request, destino_id):
+    """CU-11: muestra un itinerario sugerido por IA (vía Node.js). No se guarda."""
+    destino = get_object_or_404(Destino, pk=destino_id)
+    resultado = error = None
+    if request.method == 'POST':
+        form = ItinerarioForm(request.POST)
+        if form.is_valid():
+            try:
+                resultado = ia_client.generar_itinerario(
+                    destino.nombre, destino.presupuesto, form.cleaned_data['dias']
+                )
+            except ia_client.IAServiceError as e:
+                error = str(e)
+    else:
+        form = ItinerarioForm()
+    return render(
+        request,
+        'viajes/itinerario.html',
+        {'destino': destino, 'form': form, 'resultado': resultado, 'error': error},
+    )

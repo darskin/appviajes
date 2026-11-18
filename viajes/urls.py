@@ -15,6 +15,7 @@ urlpatterns = [
 
 
     path('<int:destino_id>/resultados/', views.results, name='results'),
+    path('<int:destino_id>/itinerario/', views.itinerario, name='itinerario'),
     path('<int:destino_id>/votar/', views.vote, name='vote'),
 
     path('<int:destino_id>/opciones/agregar/', views.agregar_opcion, name='agregar_opcion'),

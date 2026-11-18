@@ -161,3 +161,47 @@ class AdminTests(BaseTestCase):
         self.entrar('admin')
         User.objects.filter(username='admin').update(is_superuser=True)
         self.assertEqual(self.client.get('/admin/viajes/destino/').status_code, 200)
+
+
+class ItinerarioTests(BaseTestCase):
+    def url(self):
+        return reverse('viajes:itinerario', args=[self.destino.id])
+
+    def test_visitante_es_redirigido_al_login(self):
+        r = self.client.get(self.url())
+        self.assertEqual(r.status_code, 302)
+        self.assertIn('/cuentas/login/', r.url)
+
+    def test_viajero_obtiene_itinerario_sin_guardarlo(self):
+        from unittest import mock
+        self.entrar('ana')
+        with mock.patch('viajes.ia_client.generar_itinerario', return_value='Día 1: laguna') as g:
+            r = self.client.post(self.url(), {'dias': 2})
+        g.assert_called_once_with('Guatavita', 100000, 2)
+        self.assertContains(r, 'Día 1: laguna')
+        self.assertEqual(Destino.objects.count(), 1)
+
+    def test_error_del_servicio_se_muestra_al_usuario(self):
+        from unittest import mock
+        from .ia_client import IAServiceError
+        self.entrar('ana')
+        with mock.patch('viajes.ia_client.generar_itinerario', side_effect=IAServiceError('IA caída')):
+            r = self.client.post(self.url(), {'dias': 2})
+        self.assertContains(r, 'IA caída')
+
+    def test_dias_invalidos(self):
+        from unittest import mock
+        self.entrar('ana')
+        with mock.patch('viajes.ia_client.generar_itinerario') as g:
+            r = self.client.post(self.url(), {'dias': 0})
+        g.assert_not_called()
+        self.assertEqual(r.status_code, 200)
+
+
+class IAClientTests(TestCase):
+    def test_servicio_caido_lanza_error_controlado(self):
+        from django.test import override_settings
+        from .ia_client import IAServiceError, generar_itinerario
+        with override_settings(IA_SERVICE_URL='http://127.0.0.1:9', IA_SERVICE_TIMEOUT=2):
+            with self.assertRaises(IAServiceError):
+                generar_itinerario('x', 1, 1)

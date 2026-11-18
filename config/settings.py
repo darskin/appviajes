@@ -147,6 +147,11 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'viajes:index'
 LOGOUT_REDIRECT_URL = 'viajes:index'
 
+# Microservicio de IA (Node.js)
+IA_SERVICE_URL = os.environ.get('IA_SERVICE_URL', 'http://localhost:3000')
+IA_SERVICE_API_KEY = os.environ.get('IA_SERVICE_API_KEY') or os.environ.get('SERVICE_API_KEY', '')
+IA_SERVICE_TIMEOUT = int(os.environ.get('IA_SERVICE_TIMEOUT', '60'))
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 

@@ -1,0 +1,20 @@
+{% extends "viajes/base.html" %}
+{% block title %}Itinerario - {{ destino.nombre }}{% endblock %}
+{% block content %}
+<h1>Itinerario sugerido: {{ destino.nombre }}</h1>
+<p>Presupuesto del destino: ${{ destino.presupuesto }} COP. El itinerario lo genera una IA y <strong>no se guarda</strong>.</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Generar itinerario</button>
+</form>
+
+{% if error %}<p class="error"><strong>{{ error }}</strong></p>{% endif %}
+{% if resultado %}
+<h2>Sugerencia</h2>
+<div style="white-space: pre-wrap; border: 1px solid #ccc; padding: 12px;">{{ resultado }}</div>
+{% endif %}
+
+<p><a href="{% url 'viajes:detalle' destino.id %}">← Volver al destino</a></p>
+{% endblock %}
