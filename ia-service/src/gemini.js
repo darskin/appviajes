@@ -1,6 +1,6 @@
 'use strict';
 
-const MODELO = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const MODELO = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 
 function construirPrompt({ destino, presupuesto, dias }) {
   return [
@@ -34,7 +34,14 @@ async function generarItinerario(datos, { fetchFn = fetch, apiKey = process.env.
     throw err;
   }
   if (!respuesta.ok) {
-    const err = new Error(`El proveedor de IA respondió con error ${respuesta.status}.`);
+    let detalle = '';
+    try {
+      detalle = (await respuesta.json())?.error?.message || '';
+    } catch (e) { /* sin detalle */ }
+    const err = new Error(
+      `El proveedor de IA respondió con error ${respuesta.status} (modelo ${MODELO})` +
+      (detalle ? `: ${detalle.slice(0, 200)}` : '.')
+    );
     err.status = 502;
     throw err;
   }
