@@ -76,7 +76,31 @@ test('gemini: extrae el texto de la respuesta del proveedor', async () => {
   assert.strictEqual(await generarItinerario(valido, { fetchFn, apiKey: 'k' }), 'Plan listo');
 });
 
-test('gemini: error del proveedor o respuesta vacía responde 502', async () => {
-  await assert.rejects(generarItinerario(valido, { fetchFn: async () => ({ ok: false, status: 429 }), apiKey: 'k' }), (e) => e.status === 502);
-  await assert.rejects(generarItinerario(valido, { fetchFn: async () => ({ ok: true, json: async () => ({}) }), apiKey: 'k' }), (e) => e.status === 502);
+const sinEspera = async () => {};
+
+test('gemini: error definitivo o respuesta vacía responde 502', async () => {
+  await assert.rejects(generarItinerario(valido, { fetchFn: async () => ({ ok: false, status: 400, json: async () => ({ error: { message: 'mala' } }) }), apiKey: 'k', esperar: sinEspera }), (e) => e.status === 502 && /mala/.test(e.message));
+  await assert.rejects(generarItinerario(valido, { fetchFn: async () => ({ ok: true, json: async () => ({}) }), apiKey: 'k', esperar: sinEspera }), (e) => e.status === 502);
+});
+
+test('gemini: reintenta ante 503 y se recupera', async () => {
+  let llamadas = 0;
+  const fetchFn = async () => {
+    llamadas += 1;
+    if (llamadas === 1) return { ok: false, status: 503, json: async () => ({}) };
+    return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: 'listo' }] } }] }) };
+  };
+  assert.strictEqual(await generarItinerario(valido, { fetchFn, apiKey: 'k', esperar: sinEspera }), 'listo');
+  assert.strictEqual(llamadas, 2);
+});
+
+test('gemini: si el modelo principal sigue saturado usa el modelo de respaldo', async () => {
+  const modelos = [];
+  const fetchFn = async (url) => {
+    modelos.push(url.match(/models\/([^:]+):/)[1]);
+    if (!/lite/.test(url)) return { ok: false, status: 503, json: async () => ({}) };
+    return { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: 'de respaldo' }] } }] }) };
+  };
+  assert.strictEqual(await generarItinerario(valido, { fetchFn, apiKey: 'k', esperar: sinEspera }), 'de respaldo');
+  assert.ok(modelos.some((m) => /lite/.test(m)));
 });
